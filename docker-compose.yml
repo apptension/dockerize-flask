@@ -1,0 +1,12 @@
+version: "2"
+
+services:
+
+  backend:
+    restart: always
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    build: ./backend
+    command: uwsgi --http :5000 --pp /app --wsgi-file app.py --callable app --master
