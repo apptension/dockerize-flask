@@ -2,11 +2,36 @@ version: "2"
 
 services:
 
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "8080:80"
+
+  postgresapp:
+    env_file:
+      - env
+    restart: always
+    image: postgres:latest
+    volumes:
+      - data_postgres:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+
   backend:
+    env_file:
+      - env
     restart: always
     volumes:
       - ./backend:/app
-    ports:
-      - "5000:5000"
+    expose:
+      - 5000
+    depends_on:
+      - nginx
+      - postgresapp
     build: ./backend
-    command: uwsgi --http :5000 --pp /app --wsgi-file app.py --callable app --master
+    command: uwsgi --http :5000 --pp /app --wsgi-file main.py --callable app --master
+
+volumes:
+  data_postgres:
+    external: false
